@@ -2,63 +2,89 @@
 using UITest.Appium;
 using UITest.Core;
 
-namespace Microsoft.Maui.TestCases.Tests.Issues;
-
-public class Bugzilla44166 : _IssuesUITest
+namespace Microsoft.Maui.TestCases.Tests.Issues
 {
-
-	public Bugzilla44166(TestDevice testDevice) : base(testDevice)
+	public class PageCounter
 	{
+		public int Counter { get; set; }
 	}
 
-	public override string Issue => "FlyoutPage instances do not get disposed upon GC";
+	public class Bugzilla44166 : _IssuesUITest
+	{
+		// Declare the variables
+		private static PageCounter _44166MDP;
+		private static PageCounter _44166Master;
+		private static PageCounter _44166Detail;
+		private static PageCounter _44166NavContent;
 
-	// TODO From Xamarin.UITest Migration: this test references elements directly, needs to be rewritten
-	// [Test]
-	// [Category(UITestCategories.Performance)]
-	// [FailsOnIOSWhenRunningOnXamarinUITest]
-	// public void Bugzilla44166Test()
-	// {
-	// 	App.WaitForElement("Go");
-	// 	App.Tap("Go");
+		// Static constructor to initialize static variables
+		static Bugzilla44166()
+		{
+			_44166MDP = new PageCounter();
+			_44166Master = new PageCounter();
+			_44166Detail = new PageCounter();
+			_44166NavContent = new PageCounter();
+		}
 
-	// 	App.WaitForElement("Previous");
-	// 	App.Tap("Previous");
+		public Bugzilla44166(TestDevice testDevice) : base(testDevice)
+		{
+		}
 
-	// 	App.WaitForElement("GC");
+		public override string Issue => "FlyoutPage instances do not get disposed upon GC";
 
-	// 	for (var n = 0; n < 10; n++)
-	// 	{
-	// 		App.Tap("GC");
+		// TODO From Xamarin.UITest Migration: this test references elements directly, needs to be rewritten
+		[Test]
+		[Category(UITestCategories.Performance)]
+		public void Bugzilla44166Test()
+		{
+			App.WaitForElement("Go");
+			App.Tap("Go");
 
-	// 		if (App.FindElements(("Success")).Count > 0)
-	// 		{
-	// 			return;
-	// 		}
-	// 	}
+			App.WaitForElement("Previous");
+			App.Tap("Previous");
 
-	// 	string pageStats = string.Empty;
+			App.WaitForElement("GC");
 
-	// 	if (_44166MDP.Counter > 0)
-	// 	{
-	// 		pageStats += $"{_44166MDP.Counter} {nameof(_44166MDP)} allocated; ";
-	// 	}
+			for (var n = 0; n < 10; n++)
+			{
+				App.Tap("GC");
 
-	// 	if (_44166Master.Counter > 0)
-	// 	{
-	// 		pageStats += $"{_44166Master.Counter} {nameof(_44166Master)} allocated; ";
-	// 	}
+				if (App.FindElements("Success").Count > 0)
+				{
+					return;
+				}
+			}
 
-	// 	if (_44166Detail.Counter > 0)
-	// 	{
-	// 		pageStats += $"{_44166Detail.Counter} {nameof(_44166Detail)} allocated; ";
-	// 	}
+			string pageStats = string.Empty;
 
-	// 	if (_44166NavContent.Counter > 0)
-	// 	{
-	// 		pageStats += $"{_44166NavContent.Counter} {nameof(_44166NavContent)} allocated; ";
-	// 	}
+			if (_44166MDP.Counter > 0)
+			{
+				pageStats += $"{_44166MDP.Counter} {nameof(_44166MDP)} allocated; ";
+			}
 
-	// 	Assert.Fail($"At least one of the pages was not collected: {pageStats}");
-	// }
+			if (_44166Master.Counter > 0)
+			{
+				pageStats += $"{_44166Master.Counter} {nameof(_44166Master)} allocated; ";
+			}
+
+			if (_44166Detail.Counter > 0)
+			{
+				pageStats += $"{_44166Detail.Counter} {nameof(_44166Detail)} allocated; ";
+			}
+
+			if (_44166NavContent.Counter > 0)
+			{
+				pageStats += $"{_44166NavContent.Counter} {nameof(_44166NavContent)} allocated; ";
+			}
+
+			if (string.IsNullOrEmpty(pageStats))
+			{
+				Assert.Pass("All pages were collected successfully.");
+			}
+			else
+			{
+				Assert.Fail($"At least one of the pages was not collected: {pageStats}");
+			}
+		}
+	}
 }
